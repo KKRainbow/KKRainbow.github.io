@@ -1,0 +1,1192 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="配置文件,vim," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="采用Vundle对插件进行管理。">
+<meta name="keywords" content="配置文件,vim">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的vimrc">
+<meta property="og:url" content="http://sunsijie.top/2017/06/05/我的vimrc/index.html">
+<meta property="og:site_name" content="彩虹知识糖——知识是甜的">
+<meta property="og:description" content="采用Vundle对插件进行管理。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-02T05:57:49.675Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="我的vimrc">
+<meta name="twitter:description" content="采用Vundle对插件进行管理。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://sunsijie.top/2017/06/05/我的vimrc/"/>
+
+
+
+
+
+  <title>我的vimrc | 彩虹知识糖——知识是甜的</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=62474514";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">彩虹知识糖——知识是甜的</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Just Sharing</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://sunsijie.top/2017/06/05/我的vimrc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="孙思杰">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="彩虹知识糖——知识是甜的">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">我的vimrc</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-05T13:56:38+00:00">
+                2017-06-05
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-03-02T05:57:49+00:00">
+                2018-03-02
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/配置文件/" itemprop="url" rel="index">
+                    <span itemprop="name">配置文件</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/06/05/我的vimrc/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>采用Vundle对插件进行管理。<br><a id="more"></a><br><figure class="highlight vim"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">set</span> <span class="keyword">nu</span></span><br><span class="line"><span class="keyword">syntax</span> <span class="keyword">on</span></span><br><span class="line"><span class="keyword">set</span> smartindent</span><br><span class="line"><span class="keyword">set</span> smarttab</span><br><span class="line"><span class="keyword">set</span> <span class="keyword">sw</span>=<span class="number">4</span> <span class="keyword">ts</span>=<span class="number">4</span> <span class="keyword">sts</span>=<span class="number">4</span></span><br><span class="line"><span class="keyword">set</span> wildmenu</span><br><span class="line"><span class="keyword">set</span> mousemodel=<span class="keyword">popup</span></span><br><span class="line"><span class="keyword">set</span> cul cuc <span class="comment">"高亮光标所在行</span></span><br><span class="line"><span class="keyword">set</span> ruler</span><br><span class="line"><span class="keyword">set</span> scrolloff=<span class="number">4</span></span><br><span class="line"><span class="keyword">set</span> laststatus=<span class="number">2</span></span><br><span class="line"><span class="keyword">set</span> <span class="keyword">history</span>=<span class="number">1000</span></span><br><span class="line"><span class="keyword">set</span> t_Co=<span class="number">256</span></span><br><span class="line"><span class="keyword">set</span> autoread autowrite</span><br><span class="line"><span class="keyword">set</span> <span class="keyword">confirm</span></span><br><span class="line"><span class="keyword">set</span> nobackup noswapfile</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> hlsearch incsearch smartcase</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> showmatch</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> selectmode=mouse,key</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span> nocompatible              <span class="comment">" be iMproved, required</span></span><br><span class="line"><span class="keyword">filetype</span> off                  <span class="comment">" required</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" set the runtime path to include Vundle and initialize</span></span><br><span class="line"><span class="keyword">set</span> rtp+=~/.<span class="keyword">vim</span>/bundle/Vundle.<span class="keyword">vim</span></span><br><span class="line"><span class="keyword">call</span> vundle#begin()</span><br><span class="line"><span class="comment">" alternatively, pass a path where Vundle should install plugins</span></span><br><span class="line"><span class="comment">"call vundle#begin('~/some/path/here')</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" let Vundle manage Vundle, required</span></span><br><span class="line">Plugin <span class="string">'VundleVim/Vundle.vim'</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" The following are examples of different formats supported.</span></span><br><span class="line"><span class="comment">" Keep Plugin commands between vundle#begin/end.</span></span><br><span class="line"><span class="comment">" plugin on GitHub repo</span></span><br><span class="line">Plugin <span class="string">'tpope/vim-fugitive'</span></span><br><span class="line"><span class="comment">" plugin from http://vim-scripts.org/vim/scripts.html</span></span><br><span class="line"><span class="comment">" Plugin 'L9'</span></span><br><span class="line"><span class="comment">" Git plugin not hosted on GitHub</span></span><br><span class="line">Plugin <span class="string">'git://git.wincent.com/command-t.git'</span></span><br><span class="line"><span class="comment">" git repos on your local machine (i.e. when working on your own plugin)</span></span><br><span class="line"><span class="comment">" Plugin 'file:///home/gmarik/path/to/plugin'</span></span><br><span class="line"><span class="comment">" The sparkup vim script is in a subdirectory of this repo called vim.</span></span><br><span class="line"><span class="comment">" Pass the path to set the runtimepath properly.</span></span><br><span class="line">Plugin <span class="string">'rstacruz/sparkup'</span>, &#123;<span class="string">'rtp'</span>: <span class="string">'vim/'</span>&#125;</span><br><span class="line"><span class="comment">" Install L9 and avoid a Naming conflict if you've already installed a</span></span><br><span class="line"><span class="comment">" different version somewhere else.</span></span><br><span class="line"><span class="comment">" Plugin 'ascenator/L9', &#123;'name': 'newL9'&#125;</span></span><br><span class="line">Plugin <span class="string">'scrooloose/nerdtree'</span></span><br><span class="line">Plugin <span class="string">'scrooloose/nerdcommenter'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'altercation/vim-colors-solarized'</span></span><br><span class="line">Plugin <span class="string">'godlygeek/tabular'</span></span><br><span class="line">Plugin <span class="string">'plasticboy/vim-markdown'</span></span><br><span class="line">Plugin <span class="string">'iamcco/mathjax-support-for-mkdp'</span></span><br><span class="line">Plugin <span class="string">'iamcco/markdown-preview.vim'</span></span><br><span class="line">Plugin <span class="string">'jiangmiao/auto-pairs'</span></span><br><span class="line">Plugin <span class="string">'vim-signature'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'easymotion/vim-easymotion'</span></span><br><span class="line">Plugin <span class="string">'haya14busa/incsearch.vim'</span></span><br><span class="line">Plugin <span class="string">'haya14busa/incsearch-easymotion.vim'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'a.vim'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'majutsushi/tagbar'</span></span><br><span class="line">Plugin <span class="string">'vim-airline/vim-airline'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'Valloric/YouCompleteMe'</span></span><br><span class="line">Plugin <span class="string">'rdnetto/YCM-Generator'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'vimwiki/vimwiki'</span></span><br><span class="line"></span><br><span class="line">Plugin <span class="string">'skywind3000/asyncrun.vim'</span></span><br><span class="line"><span class="comment">" All of your Plugins must be added before the following line</span></span><br><span class="line"><span class="keyword">call</span> vundle#end()            <span class="comment">" required</span></span><br><span class="line"><span class="keyword">filetype</span> plugin <span class="built_in">indent</span> <span class="keyword">on</span>    <span class="comment">" required</span></span><br><span class="line"><span class="comment">" To ignore plugin indent changes, instead use:</span></span><br><span class="line"><span class="comment">"filetype plugin on</span></span><br><span class="line"><span class="comment">"</span></span><br><span class="line"><span class="comment">" Brief help</span></span><br><span class="line"><span class="comment">" :PluginList       - lists configured plugins</span></span><br><span class="line"><span class="comment">" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate</span></span><br><span class="line"><span class="comment">" :PluginSearch foo - searches for foo; append `!` to refresh local cache</span></span><br><span class="line"><span class="comment">" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal</span></span><br><span class="line"><span class="comment">"</span></span><br><span class="line"><span class="comment">" see :h vundle for more details or wiki for FAQ</span></span><br><span class="line"><span class="comment">" Put your non-Plugin stuff after this line</span></span><br><span class="line"><span class="comment">"</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" 设置主题</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:solarized_termcolors</span>=<span class="number">256</span></span><br><span class="line"><span class="keyword">set</span> background=dark</span><br><span class="line"><span class="keyword">colorscheme</span> solarized</span><br><span class="line"></span><br><span class="line"><span class="comment">" 配置NerdTree  ************************************************************************</span></span><br><span class="line"><span class="string">" autocmd vimenter * if !winbufnr(0) | NERDTree | endif  "</span>当打开<span class="keyword">vim</span>且没有文件时自动打开NERDTree</span><br><span class="line"><span class="keyword">map</span> <span class="symbol">&lt;F3&gt;</span> :NERDTreeToggle<span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="keyword">imap</span> <span class="symbol">&lt;F3&gt;</span> <span class="symbol">&lt;ESC&gt;</span> :NERDTreeToggle<span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="comment">" 配置NerdTree  ************************************************************************</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="string">" 配置EasyMotion "</span> *********************************************************************</span><br><span class="line"><span class="comment">" &lt;Leader&gt;f&#123;char&#125; to move to &#123;char&#125;</span></span><br><span class="line"><span class="keyword">map</span>  <span class="symbol">&lt;Leader&gt;</span><span class="keyword">f</span> <span class="symbol">&lt;Plug&gt;</span>(easymotion-<span class="keyword">bd</span>-<span class="keyword">f</span>)</span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">f</span> <span class="symbol">&lt;Plug&gt;</span>(easymotion-overwin-<span class="keyword">f</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">" s&#123;char&#125;&#123;char&#125; to move to &#123;char&#125;&#123;char&#125;</span></span><br><span class="line"><span class="keyword">nmap</span> s <span class="symbol">&lt;Plug&gt;</span>(easymotion-overwin-f2)</span><br><span class="line"></span><br><span class="line"><span class="comment">" Move to line</span></span><br><span class="line"><span class="keyword">map</span> <span class="symbol">&lt;Leader&gt;</span>L <span class="symbol">&lt;Plug&gt;</span>(easymotion-<span class="keyword">bd</span>-jk)</span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;Leader&gt;</span>L <span class="symbol">&lt;Plug&gt;</span>(easymotion-overwin-<span class="built_in">line</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">" Move to word</span></span><br><span class="line"><span class="keyword">map</span>  <span class="symbol">&lt;Leader&gt;</span><span class="keyword">w</span> <span class="symbol">&lt;Plug&gt;</span>(easymotion-<span class="keyword">bd</span>-<span class="keyword">w</span>)</span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">w</span> <span class="symbol">&lt;Plug&gt;</span>(easymotion-overwin-<span class="keyword">w</span>)</span><br><span class="line"><span class="comment">" You can use other keymappings like &lt;C-l&gt; instead of &lt;CR&gt; if you want to</span></span><br><span class="line"><span class="comment">" use these mappings as default search and somtimes want to move cursor with</span></span><br><span class="line"><span class="comment">" EasyMotion.</span></span><br><span class="line"><span class="function"><span class="keyword">function</span>! <span class="title">s</span>:<span class="title">incsearch_config</span><span class="params">(...)</span> <span class="title">abort</span></span></span><br><span class="line">  <span class="keyword">return</span> incsearch#util#deepextend(<span class="built_in">deepcopy</span>(&#123;</span><br><span class="line">  \   <span class="string">'modules'</span>: [incsearch#config#easymotion#module(&#123;<span class="string">'overwin'</span>: <span class="number">1</span>&#125;)],</span><br><span class="line">  \   <span class="string">'keymap'</span>: &#123;</span><br><span class="line">  \     <span class="string">"\&lt;CR&gt;"</span>: <span class="string">'&lt;Over&gt;(easymotion)'</span></span><br><span class="line">  \   &#125;,</span><br><span class="line">  \   <span class="string">'is_expr'</span>: <span class="number">0</span></span><br><span class="line">  \ &#125;), <span class="built_in">get</span>(<span class="variable">a:</span>, <span class="number">1</span>, &#123;&#125;))</span><br><span class="line"><span class="keyword">endfunction</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">noremap</span> <span class="symbol">&lt;silent&gt;</span><span class="symbol">&lt;expr&gt;</span> /  incsearch#go(<span class="symbol">&lt;SID&gt;</span>incsearch_config())</span><br><span class="line"><span class="keyword">noremap</span> <span class="symbol">&lt;silent&gt;</span><span class="symbol">&lt;expr&gt;</span> ?  incsearch#go(<span class="symbol">&lt;SID&gt;</span>incsearch_config(&#123;<span class="string">'command'</span>: <span class="string">'?'</span>&#125;))</span><br><span class="line"><span class="keyword">noremap</span> <span class="symbol">&lt;silent&gt;</span><span class="symbol">&lt;expr&gt;</span> g/ incsearch#go(<span class="symbol">&lt;SID&gt;</span>incsearch_config(&#123;<span class="string">'is_stay'</span>: <span class="number">1</span>&#125;))</span><br><span class="line"></span><br><span class="line"><span class="keyword">nnoremap</span> <span class="symbol">&lt;Esc&gt;</span><span class="symbol">&lt;Esc&gt;</span> :<span class="symbol">&lt;C-u&gt;</span><span class="keyword">nohlsearch</span><span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="string">" 配置EasyMotion "</span> *********************************************************************</span><br><span class="line"></span><br><span class="line"><span class="string">" 配置airline "</span> ***********************************************************************</span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:airline</span>#extensions#tabline#enabled = <span class="number">1</span></span><br><span class="line"><span class="string">" 配置airline "</span> ***********************************************************************</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">" 配置TagBar ××××××××××××××××××××××××××××××××</span></span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;F8&gt;</span> :TagbarToggle<span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="comment">" 配置TagBar ××××××××××××××××××××××××××××××××</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">" 配置YCM***************************************</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:ycm_show_diagnostics_ui</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:ycm_confirm_extra_conf</span> = <span class="number">0</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:ycm_seed_identifiers_with_syntax</span> = <span class="number">0</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:ycm_key_invoke_completion</span>=<span class="string">'&lt;C-i&gt;'</span></span><br><span class="line"><span class="comment">" 配置YCM***************************************</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" 自定义快捷键 ******************************************</span></span><br><span class="line"><span class="keyword">map</span> <span class="symbol">&lt;C-L&gt;</span> :<span class="keyword">tabnext</span><span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="keyword">map</span> <span class="symbol">&lt;C-H&gt;</span> :tabprev<span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="comment">" 自定义快捷键 ******************************************</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" 配置Command-t *****************************************</span></span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;silent&gt;</span> <span class="symbol">&lt;Leader&gt;</span>t <span class="symbol">&lt;Plug&gt;</span>(CommandT)</span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;silent&gt;</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">b</span> <span class="symbol">&lt;Plug&gt;</span>(CommandTBuffer)</span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;silent&gt;</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">j</span> <span class="symbol">&lt;Plug&gt;</span>(CommandTJump)</span><br><span class="line"><span class="comment">" 配置Command-t *****************************************</span></span><br><span class="line"></span><br><span class="line"><span class="comment">" 自动编译 *********************************************</span></span><br><span class="line"><span class="comment">"map &lt;F5&gt; :copen&lt;CR&gt;:wincmd k&lt;CR&gt;:AsyncRun g++ -o %&lt; %&lt;CR&gt;</span></span><br><span class="line"><span class="keyword">map</span> <span class="symbol">&lt;F5&gt;</span> :<span class="keyword">copen</span><span class="symbol">&lt;CR&gt;</span>:<span class="keyword">wincmd</span> <span class="keyword">k</span><span class="symbol">&lt;CR&gt;</span>:AsyncRun sudo ./build.<span class="keyword">sh</span> <span class="keyword">make</span><span class="symbol">&lt;CR&gt;</span></span><br><span class="line">map &lt;Leader&gt;&lt;F5&gt; :copen&lt;CR&gt;:wincmd k&lt;CR&gt;:AsyncRun g++ -o %&lt; %;./%&lt;&lt;CR&gt;</span><br><span class="line"><span class="comment">" 自动编译 *********************************************</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">"***** Markdown **************************</span></span><br><span class="line"><span class="keyword">set</span> conceallevel=<span class="number">2</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:vim_markdown_math</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:vim_markdown_frontmatter</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:vim_markdown_folding_disabled</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_path_to_chrome</span> = <span class="string">"chromium"</span></span><br><span class="line"><span class="comment">" 设置 chrome 浏览器的路径（或是启动 chrome（或其他现代浏览器）的命令）</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_auto_start</span> = <span class="number">1</span></span><br><span class="line"><span class="comment">" 设置为 1 可以在打开 markdown 文件的时候自动打开浏览器预览，只在打开</span></span><br><span class="line"><span class="comment">" markdown 文件的时候打开一次</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_auto_open</span> = <span class="number">1</span></span><br><span class="line"><span class="comment">" 设置为 1 在编辑 markdown 的时候检查预览窗口是否已经打开，否则自动打开预</span></span><br><span class="line"><span class="comment">" 览窗口</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_auto_close</span> = <span class="number">1</span></span><br><span class="line"><span class="comment">" 在切换 buffer 的时候自动关闭预览窗口，设置为 0 则在切换 buffer 的时候不</span></span><br><span class="line"><span class="comment">" 自动关闭预览窗口</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_refresh_slow</span> = <span class="number">0</span></span><br><span class="line"><span class="comment">" 设置为 1 则只有在保存文件，或退出插入模式的时候更新预览，默认为 0，实时</span></span><br><span class="line"><span class="comment">" 更新预览</span></span><br><span class="line"><span class="keyword">let</span> <span class="variable">g:mkdp_command_for_global</span> = <span class="number">0</span></span><br><span class="line"><span class="comment">" 设置为 1 则所有文件都可以使用 MarkdownPreview 进行预览，默认只有 markdown</span></span><br><span class="line"><span class="comment">" 文件可以使用改命令</span></span><br><span class="line"><span class="comment">"****************************************</span></span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">k</span> :<span class="keyword">m</span>-<span class="number">2</span><span class="symbol">&lt;CR&gt;</span></span><br><span class="line"><span class="keyword">nmap</span> <span class="symbol">&lt;Leader&gt;</span><span class="keyword">j</span> :<span class="keyword">m</span>+<span class="symbol">&lt;CR&gt;</span></span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/配置文件/" rel="tag"># 配置文件</a>
+          
+            <a href="/tags/vim/" rel="tag"># vim</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/06/Barrelfish与seL4对Capability支持的详细对比/" rel="prev" title="Barrelfish与seL4对Capability支持的详细对比">
+                Barrelfish与seL4对Capability支持的详细对比 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="孙思杰" />
+          <p class="site-author-name" itemprop="name">孙思杰</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/KKRainbow" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">孙思杰</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<div>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/three.min.js"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/select-code.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "f66f6513a7da4ba5938ce08e1f30c11a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

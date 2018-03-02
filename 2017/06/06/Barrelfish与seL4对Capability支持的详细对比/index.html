@@ -1,0 +1,1698 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Barrelfish,seL4,操作系统,Capability," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="概述Barrelfish采用Capability机制对系统资源进行管理，该机制源自seL4。 Capability可以看做是访问系统中各种资源的令牌。内存空间、IO端口、进程控制块（PCB），中断号，进程通信的信道等，都可以通过Capability来管理。 内核通常会在内核空间维护每个进程所持有的Capability的详细数据，而用户进程持有Capability的引用。当用户程序访问系统资源时，需">
+<meta name="keywords" content="Barrelfish,seL4,操作系统,Capability">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Barrelfish与seL4对Capability支持的详细对比">
+<meta property="og:url" content="http://sunsijie.top/2017/06/06/Barrelfish与seL4对Capability支持的详细对比/index.html">
+<meta property="og:site_name" content="彩虹知识糖——知识是甜的">
+<meta property="og:description" content="概述Barrelfish采用Capability机制对系统资源进行管理，该机制源自seL4。 Capability可以看做是访问系统中各种资源的令牌。内存空间、IO端口、进程控制块（PCB），中断号，进程通信的信道等，都可以通过Capability来管理。 内核通常会在内核空间维护每个进程所持有的Capability的详细数据，而用户进程持有Capability的引用。当用户程序访问系统资源时，需">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-02T05:57:49.675Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Barrelfish与seL4对Capability支持的详细对比">
+<meta name="twitter:description" content="概述Barrelfish采用Capability机制对系统资源进行管理，该机制源自seL4。 Capability可以看做是访问系统中各种资源的令牌。内存空间、IO端口、进程控制块（PCB），中断号，进程通信的信道等，都可以通过Capability来管理。 内核通常会在内核空间维护每个进程所持有的Capability的详细数据，而用户进程持有Capability的引用。当用户程序访问系统资源时，需">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://sunsijie.top/2017/06/06/Barrelfish与seL4对Capability支持的详细对比/"/>
+
+
+
+
+
+  <title>Barrelfish与seL4对Capability支持的详细对比 | 彩虹知识糖——知识是甜的</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=62474514";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">彩虹知识糖——知识是甜的</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Just Sharing</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://sunsijie.top/2017/06/06/Barrelfish与seL4对Capability支持的详细对比/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="孙思杰">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="彩虹知识糖——知识是甜的">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Barrelfish与seL4对Capability支持的详细对比</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-06-06T08:40:23+00:00">
+                2017-06-06
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-03-02T05:57:49+00:00">
+                2018-03-02
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Barrelfish/" itemprop="url" rel="index">
+                    <span itemprop="name">Barrelfish</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/06/06/Barrelfish与seL4对Capability支持的详细对比/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Barrelfish采用Capability机制对系统资源进行管理，该机制源自seL4。</p>
+<p>Capability可以看做是访问系统中各种资源的令牌。内存空间、IO端口、进程控制块（PCB），中断号，进程通信的信道等，都可以通过Capability来管理。</p>
+<p>内核通常会在内核空间维护每个进程所持有的Capability的详细数据，而用户进程持有Capability的引用。当用户程序访问系统资源时，需要使用该资源对应的Capability的引用调用系统调用，内核检查该引用的合法性后，才会允许用户对该资源进行操作。</p>
+<a id="more"></a>
+<h2 id="Capability的类型"><a href="#Capability的类型" class="headerlink" title="Capability的类型"></a>Capability的类型</h2><p>Capability的类型通常与资源一一对应。</p>
+<ul>
+<li>对于内存区域，内核中的Capability可以表示如下。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">PhysAddr_Cap</span> &#123;</span></span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">objtype_t</span> type = PHYS_ADDR;</span><br><span class="line">	<span class="keyword">addr_t</span> base;                     <span class="comment">// 内存基地址</span></span><br><span class="line">	<span class="keyword">int</span> bytes;                       <span class="comment">// 字节数</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于PCB，内核中的Capability可以表示如下。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pcb</span> &#123;</span></span><br><span class="line">	<span class="keyword">pid_t</span> pid;</span><br><span class="line">	<span class="keyword">pid_t</span> parent;</span><br><span class="line">	<span class="keyword">register_t</span> regs[];</span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">state_t</span> state;</span><br><span class="line">	...</span><br><span class="line">	<span class="comment">//进程控制块的其他内容</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">PCB_Cap</span> &#123;</span></span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">objtype_t</span> type = PCB;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">pcb</span> *<span class="title">pcb</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于IRQ中断号管理，内核可以使用如下Capability</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">IRQSrc_Cap</span> &#123;</span></span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">objtype_t</span> type = IRQSrc;</span><br><span class="line">	<span class="comment">//表示一个中断号的区间</span></span><br><span class="line">	<span class="keyword">int</span> irq_start;</span><br><span class="line">	<span class="keyword">int</span> irq_end;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>对于通信信道，内核可以使用如下Capability</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">EndPoint_Cap</span> &#123;</span></span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">objtype_t</span> type = EndPoint;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">pcb</span>* <span class="title">receiver</span>;</span>           <span class="comment">// 接收进程</span></span><br><span class="line">	<span class="keyword">char</span>* buffer;			</span><br><span class="line">	<span class="keyword">size_t</span> buffer_size;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>还有些资源对应的Capability，可能不需要额外的信息存储</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> [<span class="title">IPI</span>, <span class="title">Null</span>, <span class="title">IRQTable</span>] &#123;</span> <span class="comment">//分别表示核间终端(Inter Processor Interrupt)和空</span></span><br><span class="line">	<span class="keyword">enum</span> <span class="keyword">objtype_t</span> type = ...;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h2 id="Capability的类型转换"><a href="#Capability的类型转换" class="headerlink" title="Capability的类型转换"></a>Capability的类型转换</h2><p>_ 关键字：Capability类型 Capability关系数据库 _</p>
+<p>从上节中介绍的类型中可以看出，计算机内的各种资源是有层次关系的。<br>内存空间是最基础的一种资源，PCB、EndPoint等，都是由内存空间转换而来的。Capability的类型转换就是为了模拟这种资源的层次关系。当用户程序取得一种Capability时（通常是表示一段内存空间的RAM Capability），可以使用系统调用将该Capability转换为其他类型，内核首先通过事先定义好的规则验证该转换是否合法，若合法，则会在内核空间为该进程创建一个目标类型的Capability，并把引用返回给用户程序。<br>类型的转换并不会导致一个Capability的删除，内核会维护新产生的Capability与源Capability间继承的关系(Capability Derivation Tree)，若用户空间重复对一个的Capability进行类型转换操作，那么内核会拒绝该操作；若进程请求删除的一个Capability有子节点，那么内核也会同时删除子节点。<br>基于Capability的内核利用Capability的类型转换来实现普通操作系统提供的系统调用。<br>比如，若用户空间的程序需要申请一个IRQ号，那么它需要持有IRQTable_Cap（表明具有操作内核中IRQ转发表的权限），然后使用类似于如下的系统调用。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">An_IRQSrc_Cap_Ref = cap_retype(An_IRQTable_Cap_Ref, irq_num_from, irq_num_to, irq_handler_pointer);</span><br></pre></td></tr></table></figure>
+<p>操作系统会进行如下几步操作。</p>
+<ol>
+<li>验证程序提供的Capability Reference是否正确。</li>
+<li>在用户进程的PCB中新建一个IRQSrc类型的Capability，并根据参数填写内核中的IRQ转发表。</li>
+<li>在Capability关系数据库中，记录IRQSrc_Cap和IRQTable_Cap之间的转换关系。</li>
+<li>把新产生的IRQSrc_Cap的引用返回给用户程序。</li>
+</ol>
+<p>其他诸如映射页表(Ram_Cap -&gt; Frame_Cap)，创建进程间通信信道（Ram_Cap -&gt; EndPoint_Cap)等操作都有类似的过程。</p>
+<h2 id="Capability的其他操作"><a href="#Capability的其他操作" class="headerlink" title="Capability的其他操作"></a>Capability的其他操作</h2><ol>
+<li><p>撤销（revoke）</p>
+<p> 可以禁止目标进程使用某项资源。如撤销IRQSrc可导致用户进程不再处理某些IRQ。对Frame_Cap的撤销可以导致页表映射项的删除。</p>
+</li>
+<li><p>复制（copy）</p>
+<p> 利用复制可以是一个进程把他拥有的一些权限继承给它的子进程。</p>
+</li>
+</ol>
+<h1 id="对比"><a href="#对比" class="headerlink" title="对比"></a>对比</h1><p>要对比Capability功能，可以从<strong>Capability类型数量</strong>和支持的<strong>Capability操作</strong>两方面来对比。</p>
+<h2 id="Capability类型对比"><a href="#Capability类型对比" class="headerlink" title="Capability类型对比"></a>Capability类型对比</h2><ul>
+<li><a href="http://git.barrelfish.org/?p=barrelfish;a=blob;f=capabilities/caps.hl;h=5fd75c1d4e499de07a2b36fa4ccb9b05a08c6ae8;hb=ac6fbb2ea0c4b2f9a49b520feb714cf05355721a" target="_blank" rel="noopener">Barrelfish Capability定义文件</a></li>
+<li><a href="https://github.com/seL4/seL4/blob/master/include/object/structures_32.bf" target="_blank" rel="noopener">seL4 Capability定义文件</a></li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>Barrelfish</th>
+<th>seL4</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>Null</td>
+<td>null_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>内存空间相关</td>
+<td>Memory</td>
+<td>untyped_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>PhysAddr</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>RAM</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Capability权限</td>
+<td>Kernel</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Capability管理</td>
+<td>CNode</td>
+<td>cnode_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>L1CNode</td>
+<td>zombie_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>L2CNode</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>FCNode</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>进程管理与IPC</td>
+<td>Dispatcher</td>
+<td>domain_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>EndPoint</td>
+<td>endpoint_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>thread_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>notification_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>reply_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>页表管理</td>
+<td>Frame</td>
+<td>frame_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>Frame_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>DevFrame</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>DevFrame_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pml4</td>
+<td>asid_control_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pml4_Mapping</td>
+<td>asid_pool_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pdpt</td>
+<td>pdpt_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pdpt_Mapping</td>
+<td>pml4_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pdir</td>
+<td>page_directory_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_pdir_Mapping</td>
+<td>page_global_directory_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_ptable</td>
+<td>page_table_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_64_ptable_Mapping</td>
+<td>page_upper_directory_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_pdpt</td>
+<td>small_frame_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_pdpt_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_pdir</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_pdir_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_ptable</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_x86_32_ptable_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_ARM_l1</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_ARM_l1_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_ARM_l2</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_ARM_l2_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l0</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l0_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l1</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l1_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l2</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l2_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l3</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>VNode_AARCH64_l3_Mapping</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>IO及IRQ</td>
+<td>IRQTable</td>
+<td>io_page_table_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>IRQDest</td>
+<td>io_port_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>IRQSrc</td>
+<td>io_space_cap</td>
+</tr>
+<tr>
+<td></td>
+<td>IO</td>
+<td>irq_control_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>irq_handler_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>多核管理</td>
+<td>Notify_IPI</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>ID</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>PerfMon</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>KernelControlBlock</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>IPI</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>虚拟化</td>
+<td></td>
+<td>vcpu_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>ept_pd_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>ept_pdpt_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>ept_pml4_cap</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td>ept_pt_cap</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>以上为所有架构的Capability汇总。</li>
+<li>seL4中Capability类型由如下命令获得。<br>  <code>grep -r &quot;tag[[:blank:]]\+\w\+_cap[[:blank:]]\+\w\+&quot; -h --include=&quot;*.bf&quot; | sed -e &#39;s/tag//&#39; -e &#39;s/^\ \+//&#39; -e &#39;s/\w\+$//&#39; | tr -d &#39; &#39; | sort | uniq</code></li>
+<li><a href="https://en.wikipedia.org/wiki/Second_Level_Address_Translation#EPT" target="_blank" rel="noopener">EPT(Extended Page Table)</a></li>
+</ul>
+<h2 id="Capability操作对比"><a href="#Capability操作对比" class="headerlink" title="Capability操作对比"></a>Capability操作对比</h2><table>
+<thead>
+<tr>
+<th>Barrelfish</th>
+<th>seL4</th>
+<th>操作描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sys_create/sys_retype</td>
+<td>UntypedRetype</td>
+<td></td>
+</tr>
+<tr>
+<td>caps_revoke</td>
+<td>CNodeRevoke</td>
+<td></td>
+</tr>
+<tr>
+<td>caps_delete</td>
+<td>CNodeDelete</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>sys_copy_or_mint</td>
+<td>CNodeCopy</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>CNodeMint</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>CNodeMove</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>CNodeMutate</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>CNodeRotate</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Barrelfish的Capability支持跨核的Delete</li>
+<li>Barrelfish的Retype操作具有更丰富的语义，比如可以从 <em>Dspather Capability</em> retype 为 <em>Endpoint Capability</em>。</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Barrelfish/" rel="tag"># Barrelfish</a>
+          
+            <a href="/tags/seL4/" rel="tag"># seL4</a>
+          
+            <a href="/tags/操作系统/" rel="tag"># 操作系统</a>
+          
+            <a href="/tags/Capability/" rel="tag"># Capability</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/05/我的vimrc/" rel="next" title="我的vimrc">
+                <i class="fa fa-chevron-left"></i> 我的vimrc
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/06/为Hexo博客的代码片段添加-选择全部-按钮/" rel="prev" title="为Hexo博客的代码片段添加 选择全部 按钮">
+                为Hexo博客的代码片段添加 选择全部 按钮 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="孙思杰" />
+          <p class="site-author-name" itemprop="name">孙思杰</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/KKRainbow" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Capability的类型"><span class="nav-number">1.1.</span> <span class="nav-text">Capability的类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Capability的类型转换"><span class="nav-number">1.2.</span> <span class="nav-text">Capability的类型转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Capability的其他操作"><span class="nav-number">1.3.</span> <span class="nav-text">Capability的其他操作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对比"><span class="nav-number">2.</span> <span class="nav-text">对比</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Capability类型对比"><span class="nav-number">2.1.</span> <span class="nav-text">Capability类型对比</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Capability操作对比"><span class="nav-number">2.2.</span> <span class="nav-text">Capability操作对比</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">孙思杰</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<div>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/three.min.js"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/select-code.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "f66f6513a7da4ba5938ce08e1f30c11a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

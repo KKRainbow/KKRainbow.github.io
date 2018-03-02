@@ -1,0 +1,1270 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Barrelfish chroot," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="背景Barrelfish是微软开发的一个开源操作系统。为了研究该系统目前基础设施的完善程度，需要移植一些Linux下的用户空间工具。本文介绍了使用chroot来搭建cross compile环境的过程。">
+<meta name="keywords" content="Barrelfish chroot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用chroot搭建Barrelfish应用程序的编译环境">
+<meta property="og:url" content="http://sunsijie.top/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/index.html">
+<meta property="og:site_name" content="彩虹知识糖——知识是甜的">
+<meta property="og:description" content="背景Barrelfish是微软开发的一个开源操作系统。为了研究该系统目前基础设施的完善程度，需要移植一些Linux下的用户空间工具。本文介绍了使用chroot来搭建cross compile环境的过程。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://sunsijie.top/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/succ.png">
+<meta property="og:updated_time" content="2018-03-02T05:57:49.675Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用chroot搭建Barrelfish应用程序的编译环境">
+<meta name="twitter:description" content="背景Barrelfish是微软开发的一个开源操作系统。为了研究该系统目前基础设施的完善程度，需要移植一些Linux下的用户空间工具。本文介绍了使用chroot来搭建cross compile环境的过程。">
+<meta name="twitter:image" content="http://sunsijie.top/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/succ.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://sunsijie.top/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/"/>
+
+
+
+
+
+  <title>使用chroot搭建Barrelfish应用程序的编译环境 | 彩虹知识糖——知识是甜的</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=62474514";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">彩虹知识糖——知识是甜的</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Just Sharing</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://sunsijie.top/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="孙思杰">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="彩虹知识糖——知识是甜的">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">使用chroot搭建Barrelfish应用程序的编译环境</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-02T14:28:53+00:00">
+                2017-07-02
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-03-02T05:57:49+00:00">
+                2018-03-02
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Barrelfish/" itemprop="url" rel="index">
+                    <span itemprop="name">Barrelfish</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p><a href="http://www.barrelfish.org/" target="_blank" rel="noopener">Barrelfish</a>是微软开发的一个开源操作系统。为了研究该系统目前基础设施的完善程度，需要移植一些Linux下的用户空间工具。本文介绍了使用chroot来搭建cross compile环境的过程。<br><a id="more"></a></p>
+<h1 id="方法比较"><a href="#方法比较" class="headerlink" title="方法比较"></a>方法比较</h1><p>为了编译Barrelfish平台上的应用，有两种方法。</p>
+<h2 id="使用Hakefile"><a href="#使用Hakefile" class="headerlink" title="使用Hakefile"></a>使用Hakefile</h2><p>模仿Barrelfish的其他系统组件，把应用的所有源文件和库依赖都写在Hakefile中，利用Barrelfish的构建系统Hake来生成编译命令。</p>
+<ul>
+<li>优点<br>Hake会自动添加必要的编译选项，如果每个C文件都可以编译通过，只要Hakefile中的库依赖填写正确，那么链接过程基本不会出错。<br>另外，当库的源代码发生变化后，执行make命令就可以自动重新构建应用。</li>
+<li>缺点<br>一些较大的工具源码文件比较多，依赖关系错综复杂，有的还需要通过宏定义来对功能进行定制。只有搞清楚所有依赖和需要的宏定义才可以写出正确的Hakefile。</li>
+</ul>
+<h2 id="在configure过程中提供所有的编译选项"><a href="#在configure过程中提供所有的编译选项" class="headerlink" title="在configure过程中提供所有的编译选项"></a>在configure过程中提供所有的编译选项</h2><p>autoconf是linux下应用的常用构建方式，这类应用编译时分为configure和make两个步骤。在configure步骤时，在CFLAGS环境变量中加入-nostdlib和-nostdinc等参数来定义头文件和库文件的搜索位置，从而实现在make时只使用Barrelfish的头文件和库。</p>
+<ul>
+<li>优点<br>不用分析源码间的依赖关系，使用configure可以自动分析系统内可用的库函数和头文件，并生成正确的config.h。一般来说configure步骤通过之后，make步骤是很容易通过的。如果缺少必要的库函数或者头文件，那么configure步骤就会失败并有提示。</li>
+<li>缺点<br>与宿主系统的环境混合在一起，<br>若应用中掺杂了一些自定义的编译步骤，不仅configure步骤有可能无法正确识别环境，生成错误的config.h，也有可能会导致目标文件中链接到宿主系统的代码，使得程序无法再Barrelfish中正确运行。</li>
+</ul>
+<h2 id="使用chroot构建编译环境"><a href="#使用chroot构建编译环境" class="headerlink" title="使用chroot构建编译环境"></a>使用chroot构建编译环境</h2><p>使用chroot可以切换到一个空的根目录，根目录中的所有文件都是可控的，因此，编译时一定不会被宿主系统污染，也可以通过设置环境变量使得gcc在编译所有程序时，都使用Barrelfish的库和头文件。消除了第二种方法的缺点。</p>
+<h1 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h1><p>假设新的根目录位于/my/root目录中。为了方便说明，把该目录导出到环境变量中。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> root=/my/root</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li><p>挂载必要的文件系统<br>命令如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p <span class="variable">$root</span>/sys <span class="variable">$root</span>/proc <span class="variable">$root</span>/dev</span><br><span class="line">sudo mount --<span class="built_in">bind</span> /sys <span class="variable">$root</span>/sys</span><br><span class="line">sudo mount --<span class="built_in">bind</span> /sys <span class="variable">$root</span>/proc</span><br><span class="line">sudo mount --<span class="built_in">bind</span> /sys <span class="variable">$root</span>/dev</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>复制必要的程序<br>此时该根目录中没有任何可用的程序，如果直接使用chroot命令进入目录会有如下错误。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; sudo chroot /my/root /bin/bash</span><br><span class="line">chroot: failed to run <span class="built_in">command</span> ‘/bin/bash’: No such file or directory</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>即使把/bin/bash复制到<code>/my/myroot/bin</code>中，依然会有该提示。不过注意，虽然提示相同，但是产生的原因却不同，前者是/bin/bash文件不存在，后者是bash运行所需要的动态链接库文件不存在。因此还需要复制运行时需要的动态链接库。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt; cp /bin/bash /my/root/bash</span><br><span class="line">&gt; ldd /bin/bash</span><br><span class="line">	linux-vdso.so.1 (0x00007ffd4d7cd000)   <span class="comment">#对该项的说明见https://en.wikipedia.org/wiki/VDSO</span></span><br><span class="line">	libreadline.so.7 =&gt; /usr/lib/libreadline.so.7 (0x00007f8d2bbe9000)</span><br><span class="line">	libdl.so.2 =&gt; /usr/lib/libdl.so.2 (0x00007f8d2b9e5000)</span><br><span class="line">	libc.so.6 =&gt; /usr/lib/libc.so.6 (0x00007f8d2b640000)</span><br><span class="line">	libncursesw.so.6 =&gt; /usr/lib/libncursesw.so.6 (0x00007f8d2b3d3000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007f8d2be37000)</span><br><span class="line">&gt; cp /usr/lib/libreadline.so.7 <span class="variable">$root</span>/usr/lib/libreadline.so.7</span><br><span class="line">&gt; cp /usr/lib/libdl.so.2 <span class="variable">$root</span>/usr/lib/libdl.so.2</span><br><span class="line">&gt; cp ... <span class="variable">$root</span>/...</span><br></pre></td></tr></table></figure></p>
+<p>依赖复制完后，再次使用chroot命令，就可以成功进入了。但是此时并有任何其他的工具，诸如make，ls，gcc等命令都无法使用，还需使用上面的方法把这些命令复制到<code>$root</code>中才可以。<br>此外，注意复制正确的gcc平台版本，arm，x86等平台是有不同的gcc相对应。如arm版gcc一般名为arm-linux-eabi-gcc。<br><strong> 需要注意的是，gcc在运行时还会依赖/usr/lib/gcc/[x86_64, x86, arm]-linux-gnu/目录下的文件，否则在编译c文件时，会提示cc1命令未找到。</strong></p>
+<ol>
+<li><p>复制Barrelfish的头文件和库<br>假设宿主机上Barrelfish位于<code>$barrelfish</code>中，chroot后位于<code>/bar(宿主机的$root/bar)</code>中，那么可以使用如下的命令进行复制。<br><strong> 假设编译的是x86_64版本，编译的目录位于<code>$barrelfish/buildx86_64</code>中 </strong><br>以下目录需要被复制</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 头文件</span></span><br><span class="line">cp   <span class="variable">$barrelfish</span>/include                                   <span class="variable">$root</span>/bar/.                                -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/lib/newlib/newlib/libc/include            <span class="variable">$root</span>/bar/lib/newlib/newlib/libc           -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/lib/lwip/src/include/ipv4                 <span class="variable">$root</span>/bar/lib/lwip/src/include             -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/lib/lwip/src/include                      <span class="variable">$root</span>/bar/lib/lwip/src                     -ruL</span><br><span class="line"><span class="comment"># 库文件</span></span><br><span class="line">cp   <span class="variable">$barrelfish</span>/buildx86_64/x86_64/include                <span class="variable">$root</span>/bar/buildx86_64/x86_64               -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/buildx86_64/x86_64/lib                    <span class="variable">$root</span>/bar/buildx86_64/x86_64               -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/buildx86_64/x86_64/errors                 <span class="variable">$root</span>/bar/buildx86_64/x86_64               -ruL</span><br><span class="line">cp   <span class="variable">$barrelfish</span>/buildx86_64/x86_64/usr/drivers/megaraid   <span class="variable">$root</span>/bar/buildx86_64/x86_64/usr/drivers   -ruL</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置chroot后的环境变量<br>为了让新环境的gcc能找到正确的头文件和库，如libc等，需要设置如下环境变量。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># For convenience</span></span><br><span class="line">barroot=/bar</span><br><span class="line">build=<span class="variable">$barroot</span>/buildx86_64</span><br><span class="line">plat=x86_64</span><br><span class="line"><span class="comment"># ----------------------------------</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># -----影响GCC的环境变量-------------</span></span><br><span class="line"><span class="comment"># 影响GCC的头文件搜索路径，该环境变量定义的路径优先级 &lt; -I定义的路径 &lt; 默认搜索路径。好处是任何时候调用GCC都起作用，缺点是优先级太低。</span></span><br><span class="line"><span class="built_in">export</span> C_INCLUDE_PATH=<span class="string">"<span class="variable">$&#123;barroot&#125;</span>/include:<span class="variable">$&#123;barroot&#125;</span>/include/arch/x86_64:<span class="variable">$&#123;barroot&#125;</span>/lib/newlib/newlib/libc/include:<span class="variable">$&#123;barroot&#125;</span>/include/c:<span class="variable">$&#123;barroot&#125;</span>/include/target/x86_64:<span class="variable">$&#123;barroot&#125;</span>/lib/lwip/src/include/ipv4:<span class="variable">$&#123;barroot&#125;</span>/lib/lwip/src/include:<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/include"</span></span><br><span class="line"><span class="comment"># 影响库文件搜索路径</span></span><br><span class="line"><span class="built_in">export</span> LIBRARY_PATH=<span class="string">"<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/errors"</span></span><br><span class="line"><span class="comment"># ----------------------------------</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># -----影响configure的环境变量--------</span></span><br><span class="line"><span class="built_in">export</span> CFLAGS=<span class="string">"-std=c99 -static -U__STRICT_ANSI__ -Wstrict-prototypes -Wold-style-definition \</span></span><br><span class="line"><span class="string">	-Wmissing-prototypes -fno-omit-frame-pointer -fno-builtin -nostdinc -nostdlib -U__linux__ \</span></span><br><span class="line"><span class="string">	-Ulinux -Wall -Wshadow -Wmissing-declarations -Wmissing-field-initializers -Wtype-limits \</span></span><br><span class="line"><span class="string">	-Wredundant-decls -m64 -mno-red-zone -fPIE -fno-stack-protector -Wno-unused-but-set-variable \</span></span><br><span class="line"><span class="string">	-Wno-packed-bitfield-compat -Wno-frame-address -D__x86__ -DBARRELFISH -DBF_BINARY_PREFIX=\"\" \</span></span><br><span class="line"><span class="string">	-D_WANT_IO_C99_FORMATS -DCONFIG_LAZY_THC -DCONFIG_SVM -DUSE_KALUGA_DVM -DCONFIG_INTERCONNECT_DRIVER_LMP \</span></span><br><span class="line"><span class="string">	-DCONFIG_INTERCONNECT_DRIVER_UMP -DCONFIG_INTERCONNECT_DRIVER_MULTIHOP \</span></span><br><span class="line"><span class="string">	-DCONFIG_INTERCONNECT_DRIVER_LOCAL -DCONFIG_FLOUNDER_BACKEND_LMP \</span></span><br><span class="line"><span class="string">	-DCONFIG_FLOUNDER_BACKEND_UMP -DCONFIG_FLOUNDER_BACKEND_MULTIHOP \</span></span><br><span class="line"><span class="string">	-DCONFIG_FLOUNDER_BACKEND_LOCAL -Wpointer-arith -Wuninitialized \</span></span><br><span class="line"><span class="string">	-Wsign-compare -Wformat-security -Wno-pointer-sign -Wno-unused-result \</span></span><br><span class="line"><span class="string">	-fno-strict-aliasing -D_FORTIFY_SOURCE=2 \</span></span><br><span class="line"><span class="string">	-I<span class="variable">$&#123;barroot&#125;</span>/include -I<span class="variable">$&#123;barroot&#125;</span>/include/arch/x86_64 \</span></span><br><span class="line"><span class="string">	-I<span class="variable">$&#123;barroot&#125;</span>/lib/newlib/newlib/libc/include -I<span class="variable">$&#123;barroot&#125;</span>/include/c -I<span class="variable">$&#123;barroot&#125;</span>/include/target/x86_64 \</span></span><br><span class="line"><span class="string">	-I<span class="variable">$&#123;barroot&#125;</span>/lib/lwip/src/include/ipv4 -I<span class="variable">$&#123;barroot&#125;</span>/lib/lwip/src/include -I<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/include"</span></span><br><span class="line"><span class="comment"># 还有个环境变量名叫LDFLAGS，该变量在gcc调用命令中的展开位置位于输入文件之前，会导致undefined references错误。</span></span><br><span class="line"><span class="built_in">export</span> LIBS=<span class="string">"-Wl,-z,max-page-size=0x1000 -Wl,--build-id=none <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/crt0.o \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/crtbegin.o <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libssh.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libopenbsdcompat.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libzlib.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libposixcompat.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libterm_server.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libvfs.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libahci.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libmegaraid.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libnfs.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/liblwip.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libnet_if_raw.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libtimer.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libhashtable.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libbarrelfish.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libterm_client.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/liboctopus_parser.a \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/errors/errno.o <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libnewlib.a  \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libcompiler-rt.a <span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/crtend.o \</span></span><br><span class="line"><span class="string">	<span class="variable">$&#123;build&#125;</span>/<span class="variable">$&#123;plat&#125;</span>/lib/libcollections.a"</span> </span><br><span class="line"><span class="comment"># ------------------------------------</span></span><br><span class="line"><span class="comment"># </span></span><br><span class="line"><span class="comment"># 环境变量展开位置</span></span><br><span class="line"><span class="comment"># gcc $&#123;CFLAGS&#125; $&#123;程序定义的flags&#125; $&#123;LDFLAGS, 一系列-l命令&#125; $&#123;程序指定的库&#125; -o &lt;output&gt; &lt;inputs...&gt; $&#123;LIBS&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>把以上脚本放置在<code>$root/env.sh</code>中，每次chroot后，都使用<code>source /env.sh</code>命令引入。也可在.bashrc文件中加入source命令，启动时自动引入环境变量。</p>
+<h1 id="编译程序"><a href="#编译程序" class="headerlink" title="编译程序"></a>编译程序</h1><p>本章以编译grep命令为例。<br>复制文件所用的自动化脚本来自<a href="https://github.com/KKRainbow/BarrelfishTools" target="_blank" rel="noopener">BarrelfishTools仓库</a>的<a href="https://github.com/KKRainbow/BarrelfishTools/blob/master/cpbin.sh" target="_blank" rel="noopener">cpbin.sh文件</a>。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">➜  barrelfish git:(master) ✗ ls</span><br><span class="line">usr lib hake ....</span><br><span class="line">➜  barrelfish git:(master) ✗ <span class="built_in">pwd</span></span><br><span class="line">/home/sunsijie/image/barrelfish</span><br><span class="line">➜  barrelfish git:(master) ✗ ls myroot</span><br><span class="line">bar  bin  dev  sys ....</span><br><span class="line">➜  barrelfish git:(master) ✗ <span class="built_in">cd</span> myroot</span><br><span class="line">➜  myroot git:(master) ✗ wget http://ftp.gnu.org/gnu/grep/grep-2.5.4.tar.bz2</span><br><span class="line">➜  myroot git:(master) ✗ tar xf grep-2.5.4.tar.bz2</span><br><span class="line">➜  myroot git:(master) ✗ mv grep-2.5.4 grep</span><br><span class="line">➜  myroot git:(master) ✗ <span class="built_in">cd</span> ..</span><br><span class="line">➜  barrelfish git:(master) ✗ ./cpbin.sh</span><br><span class="line">........many outputs</span><br><span class="line">arch-sunsijie <span class="built_in">cd</span> grep</span><br><span class="line">arch-sunsijie mkdir build</span><br><span class="line">arch-sunsijie <span class="built_in">cd</span> build</span><br><span class="line">arch-sunsijie ../configure --host=x86_64 --<span class="built_in">disable</span>-nls --<span class="built_in">disable</span>-perl-regexp</span><br><span class="line">........many outputs</span><br></pre></td></tr></table></figure></p>
+<p>此时configure步骤应该是成功的，但是编译时还是会有些问题，这是因为由于newlib实现不同于glibc，导致configure时未能正确配置一些宏定义。</p>
+<ul>
+<li><p>第一个错误如下。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">../../lib/strtoumax.c:55:1: error: redefinition of <span class="string">'strtoumax'</span></span><br><span class="line"> strtoumax (char const *ptr, char **endptr, int base)</span><br><span class="line"> ^~~~~~~~~</span><br><span class="line">In file included from ../../lib/strtoumax.c:25:0:</span><br><span class="line">/bar/lib/newlib/newlib/libc/include/inttypes.h:322:25: note: previous definition of <span class="string">'strtoumax'</span> was here</span><br><span class="line"> static inline uintmax_t strtoumax(const char *s, char **endp, int base)</span><br></pre></td></tr></table></figure>
+<p>  解决方法，把<code>$root/grep/lib/strtoumax.c</code>文件中引用的头文件inttypes.h删除。</p>
+</li>
+<li><p>第二个错误如下。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">bar/buildx86_64/x86_64/lib/libcollections.a</span><br><span class="line">	../lib/libgreputils.a(regex.o): In function `regerror&apos;:</span><br><span class="line">	regex.c:(.text+0xa2e4): undefined reference to `__mempcpy&apos;</span><br></pre></td></tr></table></figure>
+<p>  解决方法，在lib/getopt.c和lib/regex.c文件中的合适位置添加<code>__mempcpy</code>的实现。代码如下。</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">static void* __mempcpy(void* dst, void* src, size_t n)</span><br><span class="line">&#123;</span><br><span class="line">	return (void*)((char*)memcpy(dst, src, n) + n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第三个错误<br>  第三个错误在于没有初始化vfs，不会导致编译错误，但是会导致运行时错误。需要在<code>$root/grep/src/grep.c:1827行</code>插入代码<code>vfs_init();</code><br>  之后，make通过。</p>
+</li>
+</ul>
+<p>使用命令<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">➜  barrelfish git:(master) ✗ cp myroot/grep/build/src/grep buildx86_64/x86_64/sbin/</span><br><span class="line">➜  barrelfish git:(master) ✗ echo &quot;module /x86_64/sbin/grep&quot; &gt;&gt; buildx86_64/platforms/x86/menu.lst.x86_64</span><br></pre></td></tr></table></figure></p>
+<p>即可在Barrelfish启动时把grep加载到ramfs中。<br>命令运行成功的截图如下。<br><img src="/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/succ.png" title="运行成功截图"></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Barrelfish-chroot/" rel="tag"># Barrelfish chroot</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/06/07/操作系统领域的5会议-5期刊-5课题组/" rel="next" title="操作系统领域的5会议-5期刊-5课题组">
+                <i class="fa fa-chevron-left"></i> 操作系统领域的5会议-5期刊-5课题组
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/11/Lex和Yacc语法示例/" rel="prev" title="Lex和Yacc语法示例">
+                Lex和Yacc语法示例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="孙思杰" />
+          <p class="site-author-name" itemprop="name">孙思杰</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/KKRainbow" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#方法比较"><span class="nav-number">2.</span> <span class="nav-text">方法比较</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用Hakefile"><span class="nav-number">2.1.</span> <span class="nav-text">使用Hakefile</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在configure过程中提供所有的编译选项"><span class="nav-number">2.2.</span> <span class="nav-text">在configure过程中提供所有的编译选项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用chroot构建编译环境"><span class="nav-number">2.3.</span> <span class="nav-text">使用chroot构建编译环境</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#步骤"><span class="nav-number">3.</span> <span class="nav-text">步骤</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编译程序"><span class="nav-number">4.</span> <span class="nav-text">编译程序</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">孙思杰</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<div>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/three.min.js"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/select-code.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "f66f6513a7da4ba5938ce08e1f30c11a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

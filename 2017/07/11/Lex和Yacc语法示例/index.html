@@ -1,0 +1,1234 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-minimal.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="bison,flex," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="为了方便以后用到的时候能快速想起lex和yacc的语法和编译过程，在此把之前写的一些东西记录下来。">
+<meta name="keywords" content="bison,flex">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lex和Yacc语法示例">
+<meta property="og:url" content="http://sunsijie.top/2017/07/11/Lex和Yacc语法示例/index.html">
+<meta property="og:site_name" content="彩虹知识糖——知识是甜的">
+<meta property="og:description" content="为了方便以后用到的时候能快速想起lex和yacc的语法和编译过程，在此把之前写的一些东西记录下来。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-03-02T05:57:49.675Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Lex和Yacc语法示例">
+<meta name="twitter:description" content="为了方便以后用到的时候能快速想起lex和yacc的语法和编译过程，在此把之前写的一些东西记录下来。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://sunsijie.top/2017/07/11/Lex和Yacc语法示例/"/>
+
+
+
+
+
+  <title>Lex和Yacc语法示例 | 彩虹知识糖——知识是甜的</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=62474514";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">彩虹知识糖——知识是甜的</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Just Sharing</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://sunsijie.top/2017/07/11/Lex和Yacc语法示例/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="孙思杰">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/uploads/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="彩虹知识糖——知识是甜的">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Lex和Yacc语法示例</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-11T11:34:54+00:00">
+                2017-07-11
+              </time>
+            
+
+            
+              <span class="post-meta-divider">|</span>
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-check-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">更新于</span>
+              
+              <time title="更新于" itemprop="dateModified" datetime="2018-03-02T05:57:49+00:00">
+                2018-03-02
+              </time>
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/工具使用/" itemprop="url" rel="index">
+                    <span itemprop="name">工具使用</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a class="cloud-tie-join-count" href="/2017/07/11/Lex和Yacc语法示例/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count join-count" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv"><i class="fa fa-file-o"></i>
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+            </span>
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计</span>
+                
+                <span title="字数统计">
+                  
+                </span>
+              
+
+              
+
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>为了方便以后用到的时候能快速想起lex和yacc的语法和编译过程，在此把之前写的一些东西记录下来。</p>
+<a id="more"></a>
+<h1 id="要解析的文件"><a href="#要解析的文件" class="headerlink" title="要解析的文件"></a>要解析的文件</h1><a href="/2017/07/11/Lex和Yacc语法示例/barrelrpc.if" title="Interface File">Interface File</a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">fkdlsajlkfjldska</span><br><span class="line">fdlksajlkfsdjla</span><br><span class="line">flkdsjalkfdsj</span><br><span class="line">typedef struct &#123;</span><br><span class="line">		int32 a;</span><br><span class="line">		int32 b;</span><br><span class="line">		int8 c;</span><br><span class="line">	&#125; mystruct;</span><br><span class="line">, out mystruct st</span><br><span class="line">*/</span><br><span class="line">interface barrelrpc &quot;Example rpc interface&quot; &#123;</span><br><span class="line"></span><br><span class="line">	rpc myrpc(in int32 qqq, out String s[2048]);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h1 id="Lex文件示例"><a href="#Lex文件示例" class="headerlink" title="Lex文件示例"></a>Lex文件示例</h1><a href="/2017/07/11/Lex和Yacc语法示例/test.l" title="词法文件">词法文件</a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line">%&#123;/* -*- C++ -*- */</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;cmath&gt;</span><br><span class="line">#include &quot;test.tab.hh&quot;</span><br><span class="line"></span><br><span class="line">static yy::location loc;</span><br><span class="line"></span><br><span class="line">#define YY_DECL yy::FlounderFileParser::symbol_type yylex()</span><br><span class="line">%&#125;</span><br><span class="line"></span><br><span class="line">%option noyywrap nounput batch nodebug noinput</span><br><span class="line"></span><br><span class="line">identy [a-zA-Z][a-zA-Z0-9_]*</span><br><span class="line">int [0-9]+</span><br><span class="line">hex 0x[0-9a-fA-F]+</span><br><span class="line">blank [ \t]</span><br><span class="line">string \&quot;([^&quot;\n]|\\\&quot;)+\&quot;</span><br><span class="line">typedef typedef</span><br><span class="line"></span><br><span class="line">%&#123;</span><br><span class="line">#define YY_USER_ACTION loc.columns(yyleng);</span><br><span class="line">%&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">%%</span><br><span class="line">%&#123;</span><br><span class="line">	loc.step();</span><br><span class="line">%&#125;</span><br><span class="line">&#123;blank&#125;+ loc.step();</span><br><span class="line">[\n]+ loc.lines(yyleng);loc.step();</span><br><span class="line"></span><br><span class="line">&quot;/*&quot;([^\*]|(\*)*[^\*/])*&quot;*/&quot; &#123;&#125;</span><br><span class="line"></span><br><span class="line">typedef return yy::FlounderFileParser::make_TYPEDEF_KEYWORD(loc);</span><br><span class="line">struct return yy::FlounderFileParser::make_STRUCT_KEYWORD(loc);</span><br><span class="line">enum return yy::FlounderFileParser::make_ENUM_KEYWORD(loc);</span><br><span class="line">rpc return yy::FlounderFileParser::make_RPC_KEYWORD(loc);</span><br><span class="line">interface return yy::FlounderFileParser::make_INTERFACE_KEYWORD(loc);</span><br><span class="line"></span><br><span class="line">&quot;,&quot; return yy::FlounderFileParser::make_COMMA(loc);</span><br><span class="line">&quot;;&quot; return yy::FlounderFileParser::make_COLON(loc);</span><br><span class="line">&quot;&#123;&quot; return yy::FlounderFileParser::make_LBRACE(loc);</span><br><span class="line">&quot;&#125;&quot; return yy::FlounderFileParser::make_RBRACE(loc);</span><br><span class="line">&quot;(&quot; return yy::FlounderFileParser::make_LPAREN(loc);</span><br><span class="line">&quot;)&quot; return yy::FlounderFileParser::make_RPAREN(loc);</span><br><span class="line">&quot;[&quot; return yy::FlounderFileParser::make_LBRACKET(loc);</span><br><span class="line">&quot;]&quot; return yy::FlounderFileParser::make_RBRACKET(loc);</span><br><span class="line"></span><br><span class="line">&#123;string&#125; return yy::FlounderFileParser::make_STRING(yytext, loc);</span><br><span class="line">&#123;int&#125; return yy::FlounderFileParser::make_INTEGER(strtol(yytext, NULL, 10), loc);</span><br><span class="line">&#123;identy&#125; return yy::FlounderFileParser::make_IDENTIFIER(yytext, loc);</span><br><span class="line"></span><br><span class="line">&lt;&lt;EOF&gt;&gt; return yy::FlounderFileParser::make_END(loc);</span><br><span class="line">%%</span><br></pre></td></tr></table></figure>
+<h1 id="yacc文件"><a href="#yacc文件" class="headerlink" title="yacc文件"></a>yacc文件</h1><a href="/2017/07/11/Lex和Yacc语法示例/test.yy" title="语法文件">语法文件</a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br></pre></td><td class="code"><pre><span class="line">%skeleton &quot;lalr1.cc&quot;</span><br><span class="line"></span><br><span class="line">%defines</span><br><span class="line">%define parser_class_name &#123;FlounderFileParser&#125;</span><br><span class="line">%define api.value.type variant</span><br><span class="line">%define api.token.constructor</span><br><span class="line">%define parse.trace</span><br><span class="line">%define parse.error verbose</span><br><span class="line"></span><br><span class="line">%locations</span><br><span class="line">%initial-action</span><br><span class="line">&#123;</span><br><span class="line">// Initialize the initial location.</span><br><span class="line">//@$.begin.filename = @$.end.filename = &amp;driver.file;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">%code requires &#123;</span><br><span class="line"></span><br><span class="line">#include &lt;iostream&gt;</span><br><span class="line">#include &lt;string&gt;</span><br><span class="line">#include &lt;vector&gt;</span><br><span class="line">#include &lt;map&gt;</span><br><span class="line">#include &lt;cstring&gt;</span><br><span class="line">using namespace std;</span><br><span class="line">struct FunctionParam</span><br><span class="line">&#123;</span><br><span class="line">	enum &#123;</span><br><span class="line">	IN, OUT</span><br><span class="line">	&#125; type;</span><br><span class="line">	string typeName;</span><br><span class="line">	string paramName;</span><br><span class="line">	int val;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct FunctionDecl</span><br><span class="line">&#123;</span><br><span class="line">	string name;</span><br><span class="line">	vector&lt;FunctionParam&gt; params;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct TypeDecl</span><br><span class="line">&#123;</span><br><span class="line">	enum &#123;</span><br><span class="line">	ARRAY, ALIAS, STRUCT, ENUM</span><br><span class="line">	&#125;type;</span><br><span class="line">	string name;</span><br><span class="line">	int val;</span><br><span class="line">	string origin;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">struct FlounderFile</span><br><span class="line">&#123;</span><br><span class="line">	string name;</span><br><span class="line">	string description;</span><br><span class="line">	vector&lt;FunctionDecl&gt; functions;</span><br><span class="line">	map&lt;string, TypeDecl&gt; types;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">%parse-param &#123;FlounderFile&amp; ff&#125;</span><br><span class="line"></span><br><span class="line">%token </span><br><span class="line">	&lt;string&gt; IDENTIFIER &quot;identifier&quot;</span><br><span class="line">	&lt;string&gt; STRING &quot;string&quot;</span><br><span class="line">;</span><br><span class="line">%token</span><br><span class="line">	END 0 &quot;end of file &quot;</span><br><span class="line">	COLON &quot;;&quot;</span><br><span class="line">	LBRACE &quot;&#123;&quot;</span><br><span class="line">	RBRACE &quot;&#125;&quot;</span><br><span class="line">	LPAREN &quot;(&quot;</span><br><span class="line">	RPAREN &quot;)&quot;</span><br><span class="line">	LBRACKET &quot;[&quot;</span><br><span class="line">	RBRACKET &quot;]&quot;</span><br><span class="line">	INTERFACE_KEYWORD &quot;interface&quot;</span><br><span class="line">	TYPEDEF_KEYWORD &quot;typedef&quot;</span><br><span class="line">	STRUCT_KEYWORD &quot;struct&quot;</span><br><span class="line">	ENUM_KEYWORD &quot;enum&quot;</span><br><span class="line">	RPC_KEYWORD &quot;rpc&quot;</span><br><span class="line">	COMMA &quot;,&quot;</span><br><span class="line">;</span><br><span class="line">%token</span><br><span class="line">	&lt;int&gt; INTEGER</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">%type &lt;FunctionParam&gt; param</span><br><span class="line">%type &lt;vector&lt;FunctionParam&gt;&gt; params</span><br><span class="line">%type &lt;FunctionDecl&gt; function</span><br><span class="line">%type &lt;TypeDecl&gt; type</span><br><span class="line">%type &lt;FlounderFile&gt; types_or_functions</span><br><span class="line">%type &lt;string&gt; param_type param_direct</span><br><span class="line"></span><br><span class="line">%%</span><br><span class="line">%code &#123;</span><br><span class="line">yy::FlounderFileParser::symbol_type yylex();</span><br><span class="line">&#125;;</span><br><span class="line">%start interface;</span><br><span class="line"></span><br><span class="line">interface : &quot;interface&quot; IDENTIFIER STRING &quot;&#123;&quot;</span><br><span class="line">			types_or_functions</span><br><span class="line">		  &quot;&#125;&quot; &quot;;&quot; &#123;ff=$5;ff.name = $2;ff.description = $3;&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">types_or_functions : %empty &#123;&#125;</span><br><span class="line">				| type types_or_functions &#123;$$ = $2; $$.types[$1.name] = $1;&#125;</span><br><span class="line">				| function types_or_functions &#123;$$ = $2; $$.functions.push_back($1);&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">type : &quot;typedef&quot; &quot;struct&quot; &quot;&#123;&quot; struct_fields &quot;&#125;&quot; param_type &quot;;&quot; &#123;$$.type=TypeDecl::STRUCT;$$.name=$6;&#125;</span><br><span class="line">	| &quot;typedef&quot; param_type IDENTIFIER &quot;[&quot; INTEGER &quot;]&quot; &quot;;&quot;&#123;$$.type=TypeDecl::ARRAY; $$.name=$2; $$.origin=$3; $$.val=$5;&#125;</span><br><span class="line">	| &quot;typedef&quot; &quot;enum&quot; &quot;&#123;&quot; enum_fields &quot;&#125;&quot; param_type &quot;;&quot;&#123;$$.type=TypeDecl::ENUM;$$.name=$6;&#125;</span><br><span class="line">	| &quot;typedef&quot; param_type param_type &quot;;&quot;&#123;$$.type=TypeDecl::ALIAS;$$.name=$2;$$.origin=$3;&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">struct_fields : %empty</span><br><span class="line">			| struct_fields param_type IDENTIFIER &quot;;&quot;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">enum_fields : %empty</span><br><span class="line">			| enum_fields &quot;,&quot; IDENTIFIER </span><br><span class="line">			| IDENTIFIER</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">function : &quot;rpc&quot; IDENTIFIER &quot;(&quot; params &quot;)&quot; &quot;;&quot; &#123;</span><br><span class="line">			$$.name = $2;</span><br><span class="line">			$$.params = $4;</span><br><span class="line">		 &#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">params : %empty &#123;&#125;</span><br><span class="line">			| params &quot;,&quot; param  &#123;$$.insert($$.begin(), $1.begin(), $1.end()); $$.push_back($3);&#125;</span><br><span class="line">			| param &#123;$$.push_back($1);&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">param : param_direct param_type IDENTIFIER &#123;</span><br><span class="line">		$$.type = $1 == &quot;in&quot; ? FunctionParam::IN : FunctionParam::OUT;</span><br><span class="line">		$$.typeName = $2;</span><br><span class="line">		$$.paramName = $3;</span><br><span class="line">	  &#125;</span><br><span class="line">		|</span><br><span class="line">		param_direct param_type IDENTIFIER &quot;[&quot; INTEGER &quot;]&quot;&#123;</span><br><span class="line">		$$.type = $1 == &quot;in&quot; ? FunctionParam::IN : FunctionParam::OUT;</span><br><span class="line">		$$.typeName = $2;</span><br><span class="line">		$$.paramName = $3;</span><br><span class="line">		$$.val = $5;</span><br><span class="line">	  &#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">param_type : IDENTIFIER &#123;$$=$1;&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">param_direct : IDENTIFIER &#123;$$=$1;&#125;</span><br><span class="line">;</span><br><span class="line"></span><br><span class="line">%%</span><br><span class="line"></span><br><span class="line">void yy::FlounderFileParser::error(const location_type&amp; l, const std::string&amp; m)</span><br><span class="line">&#123;</span><br><span class="line">	return;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h1><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//main.cpp</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"test.tab.hh"</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> yy;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">extern</span> FILE* yyin;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> FlounderFile f;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span>* argv[])</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="function">FlounderFileParser <span class="title">parser</span><span class="params">(f)</span></span>;</span><br><span class="line">	yyin = fopen(<span class="string">"./barrelrpc.if"</span>, <span class="string">"r"</span>);</span><br><span class="line">	parser.set_debug_level(<span class="literal">true</span>);</span><br><span class="line">	parser.parse();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Makefile</span></span><br><span class="line"><span class="section">rpc-compiler: lex.o parser.o main.cpp </span></span><br><span class="line">	g++ -std=c++11 -g -lm -o test lex.o parser.o main.cpp</span><br><span class="line"></span><br><span class="line"><span class="section">lex.o: test.l parser.o</span></span><br><span class="line">	flex test.l</span><br><span class="line">	g++ -c -o lex.o lex.yy.c</span><br><span class="line"></span><br><span class="line"><span class="section">parser.o: test.yy</span></span><br><span class="line">	bison test.yy</span><br><span class="line">	g++ -c -o parser.o test.tab.cc</span><br><span class="line"></span><br><span class="line"><span class="meta"><span class="meta-keyword">.PHONY</span>: clean run</span></span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm *.hh *.cc lex.yy.c *.o</span><br></pre></td></tr></table></figure>
+<h1 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h1><p>Bison文档中Calc++一节有非常详细的教程。</p>
+<ul>
+<li><a href="https://www.gnu.org/software/bison/manual/bison.pdf" target="_blank" rel="noopener">Bison</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/bison/" rel="tag"># bison</a>
+          
+            <a href="/tags/flex/" rel="tag"># flex</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/02/使用chroot搭建Barrelfish应用程序的编译环境/" rel="next" title="使用chroot搭建Barrelfish应用程序的编译环境">
+                <i class="fa fa-chevron-left"></i> 使用chroot搭建Barrelfish应用程序的编译环境
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/15/解决Visual-Studio-Code不能识别大写锁定到ESC映射的问题/" rel="prev" title="解决Visual Studio Code不能识别大写锁定到ESC映射的问题">
+                解决Visual Studio Code不能识别大写锁定到ESC映射的问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/uploads/avatar.png"
+               alt="孙思杰" />
+          <p class="site-author-name" itemprop="name">孙思杰</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+           
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">13</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/KKRainbow" target="_blank" title="Github">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  Github
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#要解析的文件"><span class="nav-number">1.</span> <span class="nav-text">要解析的文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lex文件示例"><span class="nav-number">2.</span> <span class="nav-text">Lex文件示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#yacc文件"><span class="nav-number">3.</span> <span class="nav-text">yacc文件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编译"><span class="nav-number">4.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文档"><span class="nav-number">5.</span> <span class="nav-text">文档</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2017 - 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">孙思杰</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+<div>Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a></div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      <i class="fa fa-user"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      
+    </span>
+  
+
+  
+    <span class="site-pv">
+      <i class="fa fa-eye"></i>
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/three.min.js"></script>
+
+  
+  <script type="text/javascript" src="/lib/three/canvas_sphere.min.js"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/select-code.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+    
+    <script>
+      var cloudTieConfig = {
+        url: document.location.href, 
+        sourceId: "",
+        productKey: "f66f6513a7da4ba5938ce08e1f30c11a",
+        target: "cloud-tie-wrapper"
+      };
+    </script>
+    <script src="https://img1.ws.126.net/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
